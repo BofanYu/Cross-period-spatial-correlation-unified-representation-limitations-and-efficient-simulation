@@ -1,0 +1,61 @@
+display_name,model,n_events,n_success,rmse_median,rmse_mean,rmse_std
+GH08 semivariogram,gh08,40,100,0.02995,0.03061,0.01066
+GH08 semivariogram,gh08,60,97,0.02182,0.02256,0.00763
+GH08 semivariogram,gh08,80,100,0.01607,0.01711,0.0062
+GH08 semivariogram,gh08,100,94,0.01221,0.01252,0.00509
+GH08 semivariogram,gh08,120,100,0.00439,0.00548,0.00353
+GH08 semivariogram,gh08,134,1,0.0,0.0,0.0
+IOX full semivariogram,iox_full_semivariogram,40,100,0.026290425152247103,0.028368087812705195,0.010154577578284803
+IOX full semivariogram,iox_full_semivariogram,60,97,0.0201510203770912,0.02113363702353119,0.007174835074125454
+IOX full semivariogram,iox_full_semivariogram,80,100,0.01481860241252475,0.015757482790440668,0.005736521428594629
+IOX full semivariogram,iox_full_semivariogram,100,94,0.0115709478971123,0.011525575246179674,0.004820009037944233
+IOX full semivariogram,iox_full_semivariogram,120,100,0.0040962185154109,0.005075162210742783,0.0033464391414040296
+IOX full semivariogram,iox_full_semivariogram,134,1,0.0,0.0,0.0
+LMC MLE,lmc_block_mle,40,100,0.02215,0.02268,0.00752
+LMC MLE,lmc_block_mle,60,97,0.01656,0.01722,0.00628
+LMC MLE,lmc_block_mle,80,100,0.0126,0.01291,0.00419
+LMC MLE,lmc_block_mle,100,94,0.0095,0.0103,0.00349
+LMC MLE,lmc_block_mle,120,100,0.00683,0.00694,0.00246
+LMC MLE,lmc_block_mle,134,98,0.00357,0.00244,0.00212
+LMC semivariogram,lmc,40,100,0.03073,0.03259,0.01163
+LMC semivariogram,lmc,60,97,0.02074,0.02201,0.0078
+LMC semivariogram,lmc,80,100,0.01647,0.01673,0.00589
+LMC semivariogram,lmc,100,94,0.01179,0.0121,0.00486
+LMC semivariogram,lmc,120,100,0.00511,0.00566,0.00331
+LMC semivariogram,lmc,134,1,0.0,0.0,0.0
+Multivariate Matern semivariogram,multivariate_matern,40,100,0.03171161057110265,0.03636168115794366,0.01398904266945009
+Multivariate Matern semivariogram,multivariate_matern,60,97,0.0254945888318679,0.028773465733161186,0.010728960831764056
+Multivariate Matern semivariogram,multivariate_matern,80,100,0.022105606243369602,0.022639151322717477,0.008692447870202584
+Multivariate Matern semivariogram,multivariate_matern,100,94,0.0172905295470626,0.01702003220542734,0.006951148828265931
+Multivariate Matern semivariogram,multivariate_matern,120,100,0.0084821674862536,0.009873666619554267,0.005921833085459791
+Multivariate Matern semivariogram,multivariate_matern,134,1,0.0,0.0,0.0
+PCA MLE,pca_mle,40,100,0.02821,0.03236,0.01609
+PCA MLE,pca_mle,60,97,0.0196,0.02377,0.01379
+PCA MLE,pca_mle,80,100,0.01423,0.0167,0.00871
+PCA MLE,pca_mle,100,94,0.01143,0.01331,0.00817
+PCA MLE,pca_mle,120,100,0.00545,0.00706,0.00456
+PCA MLE,pca_mle,134,1,0.0,0.0,0.0
+PCA semivariogram,pca_semivariogram,40,100,0.04235,0.05315,0.03642
+PCA semivariogram,pca_semivariogram,60,97,0.03019,0.03512,0.0244
+PCA semivariogram,pca_semivariogram,80,100,0.02527,0.02751,0.01707
+PCA semivariogram,pca_semivariogram,100,94,0.01416,0.01977,0.01482
+PCA semivariogram,pca_semivariogram,120,100,0.00623,0.00846,0.00765
+PCA semivariogram,pca_semivariogram,134,1,0.0,0.0,0.0
+Pairwise empirical semivariogram,pairwise,40,100,0.04102,0.0432,0.01538
+Pairwise empirical semivariogram,pairwise,60,97,0.03169,0.033,0.01225
+Pairwise empirical semivariogram,pairwise,80,100,0.02404,0.02543,0.01077
+Pairwise empirical semivariogram,pairwise,100,94,0.0167,0.01855,0.00968
+Pairwise empirical semivariogram,pairwise,120,100,0.00624,0.00824,0.00598
+Pairwise empirical semivariogram,pairwise,134,1,0.0,0.0,0.0
+SBSS semivariogram,sbss_semivariogram,40,100,0.0402936386762124,0.04601120152884804,0.025106510939122174
+SBSS semivariogram,sbss_semivariogram,60,97,0.0252411386366853,0.030026861199042187,0.015331640620774144
+SBSS semivariogram,sbss_semivariogram,80,100,0.0214596629508149,0.023503409071988952,0.011792518973749718
+SBSS semivariogram,sbss_semivariogram,100,94,0.01485337813904045,0.016478891428961993,0.009433640829117238
+SBSS semivariogram,sbss_semivariogram,120,100,0.0072021887075663,0.007202922025176643,0.004647661057706206
+SBSS semivariogram,sbss_semivariogram,134,1,0.0,0.0,0.0
+Separable kernel semivariogram,kronecker,40,100,0.0206,0.02375,0.01274
+Separable kernel semivariogram,kronecker,60,97,0.01618,0.01811,0.00911
+Separable kernel semivariogram,kronecker,80,100,0.01291,0.01367,0.00658
+Separable kernel semivariogram,kronecker,100,94,0.00935,0.01013,0.00547
+Separable kernel semivariogram,kronecker,120,100,0.00319,0.00408,0.00328
+Separable kernel semivariogram,kronecker,134,1,0.0,0.0,0.0
