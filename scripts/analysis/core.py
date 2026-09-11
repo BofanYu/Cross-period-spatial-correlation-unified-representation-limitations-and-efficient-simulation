@@ -1504,9 +1504,11 @@ def _event_covariance_iox(
             raise ValueError(f"Expected one IOX marginal row for period {period:g}s; found {len(matches)}")
         row_indices.append(int(matches[0]))
     marginal = marginal.iloc[row_indices]
-    phi = marginal["phi_per_km"].to_numpy(dtype=float)
-    nu = marginal["nu"].to_numpy(dtype=float)
-    nugget_fraction = marginal["nugget_fraction_alpha"].to_numpy(dtype=float)
+    pe = "length_scale_km" in marginal
+    phi = (1.0 / marginal["length_scale_km"].to_numpy(float) if pe
+           else marginal["phi_per_km"].to_numpy(float))
+    nu = marginal["gamma_pe" if pe else "nu"].to_numpy(float)
+    nugget_fraction = marginal["nugget_fraction" if pe else "nugget_fraction_alpha"].to_numpy(float)
 
     coordinates = _earth_chord_coordinates_native(lon, lat)
     order = _iox_maxmin_order(coordinates)
@@ -1518,17 +1520,12 @@ def _event_covariance_iox(
 
     factors = []
     for i in range(q):
-        correlation = (1.0 - nugget_fraction[i]) * _matern_correlation_native(
-            distance,
-            nu=nu[i],
-            alpha=phi[i],
-        )
+        correlation = (1.0 - nugget_fraction[i]) * (
+            np.exp(-(distance * phi[i])**nu[i]) if pe else
+            _matern_correlation_native(distance, nu=nu[i], alpha=phi[i]))
         np.fill_diagonal(correlation, 1.0)
         correlation = 0.5 * (correlation + correlation.T)
-        try:
-            factor = np.linalg.cholesky(correlation)
-        except np.linalg.LinAlgError:
-            factor = np.linalg.cholesky(correlation + 1.0e-10 * np.eye(n))
+        factor = np.linalg.cholesky(correlation)
         factors.append(factor)
 
     inverse_order = np.empty(n, dtype=np.int64)

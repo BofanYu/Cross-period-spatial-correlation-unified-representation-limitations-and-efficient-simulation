@@ -1,7 +1,7 @@
 """Unconditional samplers for the paper's multi-period spatial models.
 
 Outputs are ordered (station, period, realization). LMC, PCA, Separable and
-SBSS use spatial/period factors; the paper's IOX comparator uses dense cached
+SBSS use spatial/period factors; the archived IOX timing comparator used dense cached
 curve covariance, as do Matérn, Pairwise and GH08. Pairwise and GH08 require
 the same finite-network nearest-correlation repair used in the paper.
 """
@@ -741,10 +741,13 @@ def build_semivariogram_priors(
             factor_jitter=factor_jitter,
         )
 
+    if "IOX full semivariogram" in wanted:
+        from scripts.analysis.iox_sampling import build_iox_prior
+        priors["IOX full semivariogram"] = build_iox_prior(payload, lat, lon, idx, period_variances)
+
     for dense_method in (
         "Pairwise empirical",
         "GH08",
-        "IOX full semivariogram",
         "Multivariate Matern semivariogram",
     ):
         if dense_method in wanted:

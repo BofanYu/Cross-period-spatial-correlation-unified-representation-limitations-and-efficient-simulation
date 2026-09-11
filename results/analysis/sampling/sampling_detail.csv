@@ -1,0 +1,2 @@
+method,n_stations,n_periods,n_realizations,repeat,setup_seconds,sampling_seconds_total,sampling_seconds_per_realization,total_seconds,first_realization_seconds
+IOX full semivariogram,20,9,10,0,0.08200190000934526,0.00011799999629147351,1.1799999629147351e-05,0.08211990000563674,0.08201370000897441

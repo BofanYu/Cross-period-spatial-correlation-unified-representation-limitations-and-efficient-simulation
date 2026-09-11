@@ -39,6 +39,29 @@ def full_table(directory):
     return table
 
 
+def replicate_statistics(directory, output):
+    records=[]
+    for task in ('random_holdout','station_holdout','period_holdout'):
+        df=pd.read_csv(directory/f'full_{task}.csv')
+        df=df[df.method.isin(MAIN+EXTRA)]
+        unit='scenario' if task=='period_holdout' else 'repeat'
+        df[unit]=df[unit].astype(str).str.replace(r"\.0$","",regex=True)
+        grouped=df.groupby(['method',unit])[['n_observations','sse','crps_sum']].sum()
+        grouped['rmse']=np.sqrt(grouped.sse/grouped.n_observations)
+        grouped['crps']=grouped.crps_sum/grouped.n_observations
+        for metric in ('rmse','crps'):
+            pivot=grouped[metric].unstack('method')
+            if pivot.isna().any().any():raise ValueError('Missing matched replicates')
+            ranks=pivot.rank(axis=1,method='average')
+            for method in pivot:
+                values=pivot[method];sd=values.std(ddof=1)
+                records.append(dict(method=LABELS.get(method,method),task=task,metric=metric,
+                    mean=values.mean(),sd=sd,se=sd/np.sqrt(len(values)) if task!='period_holdout' else np.nan,
+                    wins=int(np.isclose(values,pivot.min(axis=1),atol=1e-12,rtol=0).sum()),
+                    n=len(values),mean_rank=ranks[method].mean()))
+    pd.DataFrame(records).to_csv(output/'predictive_replicate_statistics.csv',index=False)
+
+
 def write_table(table, path):
     table = table.rename(index=LABELS).rename_axis('representation').reset_index()
     table.to_csv(path.with_suffix('.csv'), index=False)
@@ -66,12 +89,15 @@ def make_tables(cache=ROOT / 'results/models.pkl', output=ROOT / 'results/analys
     wls.to_csv(output / 'wls.csv', index=False)
     wls['method'] = wls.method.replace({'Pairwise semivariogram': MAIN[0]})
     full = full_table(evaluation_dir)
-    full['wls'] = wls.set_index('method').wls_pairwise_definition_81
-    write_table(full.loc[MAIN, ['wls', *METRICS]], output / 'table_02_full_data')
-    aligned = pd.read_csv(evaluation_dir / 'complete_case_summary.csv').set_index('method')
-    aligned.columns = METRICS
+    full['wls'] = wls.set_index('method').unique_lower_triangle_wls_45
+    write_table(full.loc[['Independent', *MAIN], ['wls', *METRICS]], output / 'table_02_full_data')
+    complete_file = evaluation_dir / 'complete_case_summary.csv'
+    if not complete_file.exists():complete_file = ROOT / 'results/analysis/evaluation/complete_case_summary.csv'
+    aligned = pd.read_csv(complete_file).set_index('method')
+    aligned = aligned[METRICS]
     write_table(aligned.loc[MAIN[2:]], output / 'table_03_complete_case')
-    write_table(full.loc[MAIN + EXTRA, METRICS], output / 'table_04_full_data')
+    write_table(full.loc[MAIN + EXTRA, ['wls', *METRICS]], output / 'table_04_full_data')
+    replicate_statistics(evaluation_dir, output)
     print('Analysis tables saved as CSV.')
 
 

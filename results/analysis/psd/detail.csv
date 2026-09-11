@@ -1,0 +1,161 @@
+model,scale,repeat,eqid,min_eigenvalue,PSD
+GH08,correlation,0,118,-0.09866460406262251,False
+GH08,covariance,0,118,-0.12811949636386313,False
+Pairwise fit,correlation,0,118,-0.018910722711801237,False
+Pairwise fit,covariance,0,118,-0.020209934194179727,False
+GH08,correlation,1,1002,-0.10690917757866067,False
+GH08,covariance,1,1002,-0.138912611518753,False
+Pairwise fit,correlation,1,1002,-0.036001282464589335,False
+Pairwise fit,covariance,1,1002,-0.04614763796154117,False
+GH08,correlation,2,280,-0.1020107906075976,False
+GH08,covariance,2,280,-0.1327159619507977,False
+Pairwise fit,correlation,2,280,-0.1300447534949535,False
+Pairwise fit,covariance,2,280,-0.1597927446553259,False
+GH08,correlation,3,278,-0.07437591438309239,False
+GH08,covariance,3,278,-0.09667737184742274,False
+Pairwise fit,correlation,3,278,-0.6997200444931576,False
+Pairwise fit,covariance,3,278,-0.7618301017117399,False
+GH08,correlation,4,1011,-0.0826836114001125,False
+GH08,covariance,4,1011,-0.10719323653814734,False
+Pairwise fit,correlation,4,1011,0.0018907625473715169,True
+Pairwise fit,covariance,4,1011,0.0024476114676644178,True
+GH08,correlation,5,280,-0.10445796013719803,False
+GH08,covariance,5,280,-0.13578172524582616,False
+Pairwise fit,correlation,5,280,-0.03438794931655207,False
+Pairwise fit,covariance,5,280,-0.044252647708669955,False
+GH08,correlation,6,274,-0.09062720287452886,False
+GH08,covariance,6,274,-0.11790276064219825,False
+Pairwise fit,correlation,6,274,-0.13743295630692187,False
+Pairwise fit,covariance,6,274,-0.16748052517171527,False
+GH08,correlation,7,175,-0.09683820121899575,False
+GH08,covariance,7,175,-0.12603589304676582,False
+Pairwise fit,correlation,7,175,-0.10200311856116209,False
+Pairwise fit,covariance,7,175,-0.12758864662462155,False
+GH08,correlation,8,118,-0.10369654315964963,False
+GH08,covariance,8,118,-0.13464643235047502,False
+Pairwise fit,correlation,8,118,-0.002072946137743183,False
+Pairwise fit,covariance,8,118,-0.0026923093242711272,False
+GH08,correlation,9,127,-0.11090703570351965,False
+GH08,covariance,9,127,-0.14397267108544462,False
+Pairwise fit,correlation,9,127,-0.007095865208207809,False
+Pairwise fit,covariance,9,127,-0.009193817380201447,False
+GH08,correlation,10,180,-0.07237803457650882,False
+GH08,covariance,10,180,-0.09408238932746357,False
+Pairwise fit,correlation,10,180,-0.6069498585586465,False
+Pairwise fit,covariance,10,180,-0.6637614988106719,False
+GH08,correlation,11,1002,-0.11529367419856644,False
+GH08,covariance,11,1002,-0.14991281728796316,False
+Pairwise fit,correlation,11,1002,-0.04476075563712466,False
+Pairwise fit,covariance,11,1002,-0.057428125404935526,False
+GH08,correlation,12,346,-0.08698961797671415,False
+GH08,covariance,12,346,-0.11307485781840493,False
+Pairwise fit,correlation,12,346,-0.2235391930264897,False
+Pairwise fit,covariance,12,346,-0.26073564522259207,False
+GH08,correlation,13,1031,-0.11151712715092199,False
+GH08,covariance,13,1031,-0.14494270340162538,False
+Pairwise fit,correlation,13,1031,-0.04767526752040093,False
+Pairwise fit,covariance,13,1031,-0.06075835412338591,False
+GH08,correlation,14,278,-0.06606811791560012,False
+GH08,covariance,14,278,-0.08583449830122253,False
+Pairwise fit,correlation,14,278,-0.7433317928595238,False
+Pairwise fit,covariance,14,278,-0.807517952011762,False
+GH08,correlation,15,1002,-0.10738451924361359,False
+GH08,covariance,15,1002,-0.13951895146678606,False
+Pairwise fit,correlation,15,1002,-0.02908134164962035,False
+Pairwise fit,covariance,15,1002,-0.03744053528732852,False
+GH08,correlation,16,1015,-0.104947639090884,False
+GH08,covariance,16,1015,-0.13651356006685628,False
+Pairwise fit,correlation,16,1015,-0.3426422280662284,False
+Pairwise fit,covariance,16,1015,-0.3900776124149077,False
+GH08,correlation,17,1045,-0.08877580943973228,False
+GH08,covariance,17,1045,-0.11528220034357958,False
+Pairwise fit,correlation,17,1045,-0.0787182067318848,False
+Pairwise fit,covariance,17,1045,-0.09755863354587135,False
+GH08,correlation,18,1066,-0.08981668210542873,False
+GH08,covariance,18,1066,-0.11681430310210406,False
+Pairwise fit,correlation,18,1066,-0.44597432798322184,False
+Pairwise fit,covariance,18,1066,-0.4960935524164559,False
+GH08,correlation,19,1011,-0.08654361589793116,False
+GH08,covariance,19,1011,-0.1122073374588607,False
+Pairwise fit,correlation,19,1011,0.0017922084873855022,True
+Pairwise fit,covariance,19,1011,0.0023194120974953055,True
+GH08,correlation,20,174,-0.0851897755234393,False
+GH08,covariance,20,174,-0.11085343094485503,False
+Pairwise fit,correlation,20,174,-0.11873498425402093,False
+Pairwise fit,covariance,20,174,-0.14648699062112208,False
+GH08,correlation,21,172,-0.10609099830526418,False
+GH08,covariance,21,172,-0.13805425506090171,False
+Pairwise fit,correlation,21,172,-0.07502134589409433,False
+Pairwise fit,covariance,21,172,-0.09513427490092956,False
+GH08,correlation,22,1002,-0.11009194881492677,False
+GH08,covariance,22,1002,-0.14311865517489455,False
+Pairwise fit,correlation,22,1002,-0.05508819073105844,False
+Pairwise fit,covariance,22,1002,-0.07011770310447653,False
+GH08,correlation,23,1045,-0.08877580943973228,False
+GH08,covariance,23,1045,-0.11528220034357958,False
+Pairwise fit,correlation,23,1045,-0.0787182067318848,False
+Pairwise fit,covariance,23,1045,-0.09755863354587135,False
+GH08,correlation,24,173,-0.09734628993242717,False
+GH08,covariance,24,173,-0.12663827211239873,False
+Pairwise fit,correlation,24,173,-0.055559592053210594,False
+Pairwise fit,covariance,24,173,-0.07093712430029625,False
+GH08,correlation,25,1128,-0.12147169792275457,False
+GH08,covariance,25,1128,-0.15801559709521779,False
+Pairwise fit,correlation,25,1128,-0.09347556828783499,False
+Pairwise fit,covariance,25,1128,-0.11713239172059449,False
+GH08,correlation,26,1016,-0.0895029400435348,False
+GH08,covariance,26,1016,-0.1164211058099779,False
+Pairwise fit,correlation,26,1016,-0.44728551780207165,False
+Pairwise fit,covariance,26,1016,-0.497081662316225,False
+GH08,correlation,27,1038,-0.09738718472899566,False
+GH08,covariance,27,1038,-0.1266730539604135,False
+Pairwise fit,correlation,27,1038,-0.442241192978999,False
+Pairwise fit,covariance,27,1038,-0.4938246535997122,False
+GH08,correlation,28,1064,-0.0917177156809984,False
+GH08,covariance,28,1064,-0.11931517047185144,False
+Pairwise fit,correlation,28,1064,-0.4029780224746836,False
+Pairwise fit,covariance,28,1064,-0.45177668256448383,False
+GH08,correlation,29,176,-0.08391101364704741,False
+GH08,covariance,29,176,-0.10908243785983196,False
+Pairwise fit,correlation,29,176,-0.6666641409596219,False
+Pairwise fit,covariance,29,176,-0.7279203981120578,False
+GH08,correlation,30,1075,-0.09802137109226021,False
+GH08,covariance,30,1075,-0.12743052031372468,False
+Pairwise fit,correlation,30,1075,-0.6135500733926207,False
+Pairwise fit,covariance,30,1075,-0.6732031915471763,False
+GH08,correlation,31,1128,-0.120117156831713,False
+GH08,covariance,31,1128,-0.1562582919481501,False
+Pairwise fit,correlation,31,1128,-0.0943872152551121,False
+Pairwise fit,covariance,31,1128,-0.11823125170493749,False
+GH08,correlation,32,1018,-0.10178081183922134,False
+GH08,covariance,32,1018,-0.13235705877023823,False
+Pairwise fit,correlation,32,1018,-0.13507472324237502,False
+Pairwise fit,covariance,32,1018,-0.16445608314940485,False
+GH08,correlation,33,1068,-0.1047280882848544,False
+GH08,covariance,33,1068,-0.13626591879953773,False
+Pairwise fit,correlation,33,1068,-0.3260624640090433,False
+Pairwise fit,covariance,33,1068,-0.3731114352204173,False
+GH08,correlation,34,137,-0.08990616845944685,False
+GH08,covariance,34,137,-0.11700744958860028,False
+Pairwise fit,correlation,34,137,-0.1011621132054258,False
+Pairwise fit,covariance,34,137,-0.12639036635437656,False
+GH08,correlation,35,1045,-0.08877580943973228,False
+GH08,covariance,35,1045,-0.11528220034357958,False
+Pairwise fit,correlation,35,1045,-0.0787182067318848,False
+Pairwise fit,covariance,35,1045,-0.09755863354587135,False
+GH08,correlation,36,1064,-0.08387877995039292,False
+GH08,covariance,36,1064,-0.10909491326102083,False
+Pairwise fit,correlation,36,1064,-0.46303387722065686,False
+Pairwise fit,covariance,36,1064,-0.5133658981877438,False
+GH08,correlation,37,279,-0.07206885663089713,False
+GH08,covariance,37,279,-0.09373625130549432,False
+Pairwise fit,correlation,37,279,-0.5446167155299061,False
+Pairwise fit,covariance,37,279,-0.5977974698320108,False
+GH08,correlation,38,274,-0.09260360279841778,False
+GH08,covariance,38,274,-0.12049466650319593,False
+Pairwise fit,correlation,38,274,-0.14334279517047155,False
+Pairwise fit,covariance,38,274,-0.1743649239939029,False
+GH08,correlation,39,125,-0.08314511692484614,False
+GH08,covariance,39,125,-0.10794965655917782,False
+Pairwise fit,correlation,39,125,-0.03098390874183016,False
+Pairwise fit,covariance,39,125,-0.0396373712660085,False

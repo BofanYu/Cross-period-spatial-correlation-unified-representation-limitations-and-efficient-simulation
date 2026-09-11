@@ -1,0 +1,20 @@
+{
+  "seed": 123,
+  "replicates": 40,
+  "stations": 40,
+  "periods": [
+    0.01,
+    0.03,
+    0.06,
+    0.1,
+    0.3,
+    0.6,
+    1.0,
+    3.0,
+    6.0
+  ],
+  "eligible_events": 40,
+  "PSD_tolerance": 1e-08,
+  "first20_verified": true,
+  "policy": "Uniform eligible event then 40 distinct complete-case stations; no nugget, jitter, PSD repair, or refit."
+}

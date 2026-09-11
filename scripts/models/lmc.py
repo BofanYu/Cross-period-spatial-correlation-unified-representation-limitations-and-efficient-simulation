@@ -1166,6 +1166,9 @@ def goulard_pe(
                 numerator += (1.0 / h) * (gamma_exper[k] - gamma_trunc) * kernel
                 denominator += (1.0 / h) * kernel ** 2
 
+            weights = np.full((nper, nper), 0.5)
+            np.fill_diagonal(weights, 1.0)
+            numerator = denominator * b_current[l0] + weights * (numerator - denominator * b_current[l0])
             evals, evecs = np.linalg.eigh(numerator)
             evals[evals < 0.0] = 1e-10
             numerator_psd = evecs @ np.diag(evals) @ evecs.T
@@ -1177,9 +1180,10 @@ def goulard_pe(
         gamma_fit = lmc_variogram_pe_semivariogram(b_current, length_scales, h, gammas)
         for i in range(nper):
             for j in range(nper):
-                wss += (1.0 / h) * (gamma_exper[k][i, j] - gamma_fit[i, j]) ** 2
+                wss += (1.0 if i == j else 0.5) * (1.0 / h) * (gamma_exper[k][i, j] - gamma_fit[i, j]) ** 2
 
     return wss, b_current
+
 
 
 def normalize_B_semivariogram(b_list):

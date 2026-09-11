@@ -212,19 +212,8 @@ def empirical_event_semivariograms(
 
 
 def matern_correlation(distance, phi: float, nu: float) -> np.ndarray:
-    """Unit-variance Matérn correlation with rate phi (per km)."""
-    distance = np.asarray(distance, dtype=float)
-    x = float(phi) * np.abs(distance)
-    result = np.ones_like(x)
-    positive = x > 0
-    xp = x[positive]
-    if xp.size:
-        with np.errstate(divide="ignore", invalid="ignore", over="ignore", under="ignore"):
-            log_result = (1.0 - float(nu)) * np.log(2.0) - gammaln(float(nu))
-            log_result = log_result + float(nu) * np.log(xp) + np.log(kv(float(nu), xp))
-            value = np.exp(log_result)
-        result[positive] = np.clip(np.where(np.isfinite(value), value, 0.0), 0.0, 1.0)
-    return result
+    """Compatibility name: PE kernel; phi=1/length and nu=gamma, not Matern."""
+    return np.exp(-(np.abs(np.asarray(distance, dtype=float))*float(phi))**float(nu))
 
 
 def marginal_semivariogram(distance, sill: float, phi: float, nu: float, nugget_fraction: float):
@@ -260,70 +249,25 @@ def _auto_wss(parameters, h, gamma, sill) -> float:
     return float(np.sum((gamma - prediction) ** 2 / h))
 
 
-def fit_marginals(empirical: EmpiricalVariograms, tail_bins: int = 10) -> MarginalFit:
-    """Fit phi, nu and nugget fraction separately; keep each sill fixed."""
-    q = len(PERIODS)
-    sill = tail_auto_sills(empirical, tail_bins)
-    phi = np.empty(q)
-    nu = np.empty(q)
-    nugget = np.empty(q)
-    wss = np.empty(q)
-    rows: list[dict] = []
-    bounds = [
-        (np.log(1.0e-4), np.log(2.0)),
-        (np.log(0.05), np.log(5.0)),
-        (-9.21024037, 2.94443898),  # alpha in [0.0001, 0.95]
-    ]
-    starts = (
-        (0.014, 0.20, 0.20),
-        (0.008, 0.50, 0.05),
-        (0.030, 1.00, 0.35),
-        (0.080, 2.00, 0.60),
-    )
-
-    for i, period in enumerate(PERIODS):
-        supported = (empirical.counts[i, i] > 0) & np.isfinite(empirical.gamma[i, i])
-        h = empirical.h[supported]
-        gamma = empirical.gamma[i, i, supported]
-        results = []
-        for phi0, nu0, nugget0 in starts:
-            x0 = np.asarray(
-                [np.log(phi0), np.log(nu0), np.log(nugget0 / (1.0 - nugget0))]
-            )
-            results.append(
-                minimize(
-                    _auto_wss,
-                    x0,
-                    args=(h, gamma, sill[i]),
-                    method="L-BFGS-B",
-                    bounds=bounds,
-                    options={"maxiter": 2000, "ftol": 1.0e-14, "gtol": 1.0e-9},
-                )
-            )
-        best = min(results, key=lambda result: float(result.fun))
-        phi[i], nu[i], nugget[i] = (
-            np.exp(best.x[0]),
-            np.exp(best.x[1]),
-            expit(best.x[2]),
-        )
-        wss[i] = float(best.fun)
-        rows.append(
-            {
-                "period_s": period,
-                "sigma_ii_tail10": sill[i],
-                "phi_per_km": phi[i],
-                "nu": nu[i],
-                "nugget_fraction_alpha": nugget[i],
-                "nugget_variance": sill[i] * nugget[i],
-                "spatial_variance": sill[i] * (1.0 - nugget[i]),
-                "wss": wss[i],
-                "success": bool(best.success),
-                "message": str(best.message),
-                "iterations": int(best.nit),
-                "function_evaluations": int(best.nfev),
-            }
-        )
-    return MarginalFit(sill, phi, nu, nugget, wss, rows)
+def fit_marginals(empirical, tail_bins=10):
+    sills = tail_auto_sills(empirical, tail_bins)
+    rates, powers, scores, rows = [], [], [], []
+    bounds = [(np.log(1e-4),np.log(2)),(np.log(.05),np.log(2))]
+    starts = [(.014,.4),(.008,.7),(.03,1),(.08,1.5)]
+    for i,period in enumerate(PERIODS):
+        good=(empirical.counts[i,i]>0)&np.isfinite(empirical.gamma[i,i])
+        h,y=empirical.h[good],empirical.gamma[i,i,good]
+        def cost(x):
+            prediction=sills[i]*(1-matern_correlation(h,np.exp(x[0]),np.exp(x[1])))
+            return float(np.sum((y-prediction)**2/h))
+        results=[minimize(cost,np.log(start),method='L-BFGS-B',bounds=bounds,
+                 options={'maxiter':2000,'ftol':1e-14,'gtol':1e-9}) for start in starts]
+        best=min(results,key=lambda r:r.fun)
+        rate,power=np.exp(best.x)
+        rates.append(rate); powers.append(power); scores.append(best.fun)
+        rows.append(dict(period_s=float(period),length_scale_km=float(1/rate),gamma_pe=float(power),
+                         sill=float(sills[i]),nugget_fraction=0.0,success=bool(best.success),wls=float(best.fun)))
+    return MarginalFit(sills,np.array(rates),np.array(powers),np.zeros(9),np.array(scores),rows)
 
 
 def _maxmin_order(coordinates: np.ndarray, recid: np.ndarray) -> np.ndarray:
@@ -380,14 +324,7 @@ def iox_semivariogram_basis(
             )
             np.fill_diagonal(correlation, 1.0)
             correlation = 0.5 * (correlation + correlation.T)
-            try:
-                factor = cholesky(correlation, lower=True, check_finite=False)
-            except np.linalg.LinAlgError:
-                factor = cholesky(
-                    correlation + 1.0e-10 * np.eye(len(correlation)),
-                    lower=True,
-                    check_finite=False,
-                )
+            factor = cholesky(correlation, lower=True, check_finite=False)
             correlation_matrices.append(correlation)
             factors.append(factor)
 
@@ -519,7 +456,7 @@ def fit_cross_coregionalization(
             start,
             method="L-BFGS-B",
             bounds=[(-5.0, 5.0)] * len(start),
-            options={"maxiter": 2500, "maxls": 50, "ftol": 1.0e-14, "gtol": 1.0e-9},
+            options={"maxiter": 2500, "maxfun": 100000, "maxls": 50, "ftol": 1.0e-14, "gtol": 1.0e-9},
         )
         for start in starts
     ]

@@ -77,7 +77,7 @@ def make_data_figure(frames):
             label=labels[period],
         )
 
-    ax_station.set_xlabel("Number of usable stations per event", labelpad=11)
+    ax_station.set_xlabel("Number of stations per event", labelpad=11)
     ax_station.set_ylabel("Count", labelpad=10)
     ax_station.set_xlim(27.0, 558.0)
     ax_station.set_ylim(bottom=0.0)
@@ -297,7 +297,7 @@ METHOD_ORDER = (
 )
 
 SHORT_LABELS = {
-    "Pairwise empirical semivariogram": "Pairwise empirical",
+    "Pairwise empirical semivariogram": "Pairwise fit",
     "GH08 semivariogram": "GH08",
     "PCA semivariogram": "PCA",
     "Kronecker semivariogram": "Separable kernel",
@@ -567,7 +567,7 @@ NEW_METHODS = (
 )
 
 LABELS = {
-    BASE_METHODS[0]: "Pairwise empirical",
+    BASE_METHODS[0]: "Pairwise fit",
     BASE_METHODS[1]: "GH08",
     BASE_METHODS[2]: "Separable kernel",
     BASE_METHODS[3]: "PCA",
@@ -1021,7 +1021,7 @@ def plot_fitting_time(summary: pd.DataFrame, output_path: Path) -> None:
     ].copy()
     plotted = plotted.sort_values("fit_time_median_seconds", ascending=True)
     display_labels = {
-        "Pairwise empirical semivariogram": "Pairwise empirical",
+        "Pairwise empirical semivariogram": "Pairwise fit",
         "GH08 semivariogram": "GH08",
         "PCA semivariogram": "PCA semivariogram",
         "Kronecker semivariogram": "Separable kernel",

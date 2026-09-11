@@ -23,27 +23,45 @@ def save(fig, path, dpi=240, pad=0.04):
 
 def data_requirements(data, methods, selected):
     fig, axes = plt.subplots(2, 1, figsize=(12.8, 12.4), sharex=True)
-    colors = dict(zip(methods, plt.get_cmap("tab10").colors)) if selected else {}
+    colors = {m: ("tab:red" if "PCA" in m else "tab:brown" if "LMC" in m
+                  else "tab:green" if "Separable" in m else "tab:orange" if "GH08" in m
+                  else "tab:blue") for m in methods}
     for ax, metric, label, letter in zip(axes, ("rmse_median", "rmse_std"),
         ("Median RMSE vs full-data reference", "RMSE standard deviation"), "ab"):
         for method in methods:
             values = data.loc[data.display_name.eq(method)].sort_values("n_events")
             kwargs = style.method_line_kwargs(method)
-            kwargs["linestyle"] = "-" if "MLE" in method else "--"
+            kwargs["linestyle"] = "--" if "MLE" in method else "-"
             if selected:
                 kwargs.update(color=colors[method], markerfacecolor=colors[method], linewidth=2.2, markersize=6.5)
-            ax.plot(values.n_events, values[metric], label=method, **kwargs)
+            ax.plot(values.n_events, values[metric], label=method.replace("Pairwise empirical", "Pairwise fit"), **kwargs)
         ax.set_ylabel(label, fontsize=20)
         ax.set_xlabel(f"Number of events\n({letter})", fontsize=20)
         ax.set_xticks(sorted(data.n_events.unique()))
         ax.tick_params(labelsize=17, labelbottom=True)
         p._style_axis(ax)
     handles, labels = axes[0].get_legend_handles_labels()
+    by_name=dict(zip(methods,zip(handles,labels)))
+    order=([methods[i] for i in [0,2,3,5,1,4,6]] if selected else
+           [methods[i] for i in [0,2,3,5,8,1,7,4,6,9]])
+    if selected:
+        from matplotlib.lines import Line2D
+        entries=[by_name[m] for m in order]
+        entries.insert(5,(Line2D([],[],linestyle="none"),""))
+    else: entries=[by_name[m] for m in order]
+    handles,labels=zip(*entries)
     fig.legend(handles, labels, loc="upper center", ncol=2, frameon=False, fontsize=16,
         bbox_to_anchor=(0.54, 1.0), columnspacing=1.1)
     fig.subplots_adjust(left=0.14, right=0.985, bottom=0.09, top=0.79, hspace=0.35)
     return fig
 
+
+def move_panel_labels(fig,n):
+    for ax in fig.axes[:n]:
+        title=ax.get_title()
+        ax.set_title("")
+        ax.text(.5,-.215,title,transform=ax.transAxes,ha="center",va="top",fontsize=21,clip_on=False)
+    fig.subplots_adjust(bottom=.12,hspace=.37)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -67,8 +85,9 @@ def main():
     matrices = p.build_fixed_distance_matrices(curves, (5.,))
     normalized = p.build_normalized_decay_matrices(curves, (5.,))
     levels = np.linspace(*p._comparison_limits(normalized, 5.), 16)
-    save(p.plot_combined_distance_figure(periods, matrices, normalized, 5., levels),
-         out / "fig02_cross_period_flexibility.png")
+    fig=p.plot_combined_distance_figure(periods, matrices, normalized, 5., levels)
+    move_panel_labels(fig,6)
+    save(fig, out / "fig02_cross_period_flexibility.png")
     colors = plt.cm.Blues(np.linspace(0.05,0.95,len(periods)))
     save(p.build_empirical_semivariogram_figure(payload,colors), out / "fig03_pca_cpc.png")
 
@@ -90,6 +109,7 @@ def main():
         rhoh=p.interpolate_correlation_matrix(np.asarray(h),np.asarray(rho),5.)
         extra[method] = {"rho_0":rho0,"rho_h":rhoh,"rhobar":rhoh/rho0}
     fig,_,_ = p.plot_comparison(ROOT,periods,extra)
+    move_panel_labels(fig,4)
     save(fig,out/"fig09_additional_models.png", dpi=300, pad=0.05)
     save(data_requirements(requirements,list(style.ALL_MODELS),False),out/"fig10_all_data_requirements.png")
     for number,sweep,column,label,log in ((11,"station","station_count","stations",True),

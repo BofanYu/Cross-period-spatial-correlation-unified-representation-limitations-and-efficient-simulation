@@ -125,7 +125,7 @@ def main():
     metadata={"python":platform.python_version(),"platform":platform.platform(),"numpy":np.__version__,
         "threads":args.threads,"seed":args.seed,"repeats":args.repeats,"blas":threadpool_info(),
         "timing_definition":"First realization = setup + batch average sampling per realization; fit/data loading and station generation excluded.",
-        "iox_definition":"Historical article comparator: dense covariance interpolated from cached matrix-valued correlation curves."}
+        "iox_definition":"Native structured IOX: period mixing followed by marginal PE spatial factors, zero nugget. Archived figure timings are historical and not overwritten."}
     for library in metadata["blas"]: library.pop("filepath",None)
     write_metadata(args.output_dir / "run_config.csv", metadata)
 

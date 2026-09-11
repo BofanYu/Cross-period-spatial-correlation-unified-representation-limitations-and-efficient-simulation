@@ -61,15 +61,9 @@ def _model_semivariograms(payload: dict, data) -> dict[str, np.ndarray]:
 
 
 def calculate_wls(payload: dict) -> list[dict[str, float | str]]:
-    """Apply the original Pairwise objective to all ten fitted models.
+    """Sum 45 unique period-pair targets (9 direct + 36 cross), weighted by 1/h.
 
-    The objective is
-
-        sum_{i=1}^9 sum_{j=1}^9 sum_b
-            (1 / h_b) [gamma_emp,ij(h_b) - gamma_model,ij(h_b)]^2.
-
-    Thus every off-diagonal period pair is counted twice, exactly as in
-    ``scripts/models/pairwise.py``.
+    The 81-entry sum is retained only as a diagnostic, not the paper objective.
     """
     data = comparison_data_from_state(payload["data_state"])
     empirical = np.asarray(data.gamma_emp, dtype=float)
@@ -100,16 +94,16 @@ def calculate_wls(payload: dict) -> list[dict[str, float | str]]:
             }
         )
 
-    rows.sort(key=lambda row: float(row["wls_pairwise_definition_81"]))
+    rows.sort(key=lambda row: float(row["unique_lower_triangle_wls_45"]))
     pairwise_wls = next(
-        float(row["wls_pairwise_definition_81"])
+        float(row["unique_lower_triangle_wls_45"])
         for row in rows
         if row["method"] == "Pairwise semivariogram"
     )
     for rank, row in enumerate(rows, start=1):
         row["rank"] = rank
         row["ratio_to_pairwise"] = (
-            float(row["wls_pairwise_definition_81"]) / pairwise_wls
+            float(row["unique_lower_triangle_wls_45"]) / pairwise_wls
         )
 
     cached_pairwise_wls = float(payload["pairwise_empirical"]["fit"]["wss"])
@@ -151,12 +145,12 @@ def main() -> None:
     write_csv(rows, args.output.resolve())
 
     print(
-        "rank  method                              WLS(81)       auto(9)       cross(72)    ratio"
+        "rank  method                              WLS(45)       auto(9)       cross(72)    ratio"
     )
     for row in rows:
         print(
             f"{int(row['rank']):>4}  {str(row['method']):<35} "
-            f"{float(row['wls_pairwise_definition_81']):>12.9f} "
+            f"{float(row['unique_lower_triangle_wls_45']):>12.9f} "
             f"{float(row['auto_wls_9']):>12.9f} "
             f"{float(row['ordered_cross_wls_72']):>12.9f} "
             f"{float(row['ratio_to_pairwise']):>8.3f}"

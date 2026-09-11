@@ -13,7 +13,7 @@ scripts/
   refit.py
   reproduce.py
 results/
-  models.pkl               # all 8 model families / 10 fitted variants
+  models.pkl               # updated full-data fits: all 8 model families / 10 fitted variants
   analysis/
     evaluation/            # saved event likelihoods and holdout scores
     benchmarks/            # fitting and sampling times, experiment summaries
@@ -29,7 +29,7 @@ python -m pip install -r requirements.txt
 python -m scripts.reproduce
 ```
 
-Reproduction loads `results/models.pkl`, regenerates CSV tables and figures using the saved experiment results, and checks that the PKL exactly matches the original file before and after the run. The check is saved as `results/analysis/models_check.csv`. There is no comparison against manuscript values. The saved `refit_check.csv` records selected GH08/PCA refits against the original model curves (maximum absolute difference about 2.49e-6).
+Reproduction loads `results/models.pkl`, regenerates CSV tables and figures using the saved experiment results, and checks that the PKL exactly matches the original file before and after the run. The check is saved as `results/analysis/models_check.csv`. Computational settings, implementation details and verification commands are described in [PAPER_SYNC.md](PAPER_SYNC.md). The saved `refit_check.csv` records the current Pairwise, weighted-Goulard LMC and powered-exponential IOX refits. Earlier GH08/PCA checks are retained under `results/analysis/historical`. Run `python -m scripts.analysis.verify_paper` for selected-event likelihood/holdout and structured-IOX consistency checks.
 
 To refit models (updates the single PKL and retains unselected models):
 
@@ -47,7 +47,11 @@ Generate plots with `python -m scripts.analysis.plots` and tables with `python -
 ```bash
 python -m scripts.analysis.predictive --dataset full
 python -m scripts.analysis.predictive --dataset complete
-python -m scripts.analysis.tables --evaluation-dir results/analysis/prediction
+python -m scripts.analysis.tables --evaluation-dir results/analysis/prediction/full/full_run
 ```
 
 `predictive --smoke` runs a small check. `checks`, `check_sampling`, `data_requirements`, and `benchmark_sampling` in `scripts.analysis` provide additional numerical checks and experiment runs. Reports and settings are CSV only. The processed residuals are the starting point; upstream NGA-West2/CY14 preprocessing is not included. Saved timing measurements are used for plots; rerun timings depend on hardware.
+
+## September 11 paper version
+
+See [PAPER_SYNC.md](PAPER_SYNC.md) for current fit/evaluation policies, separate complete-case models, historical benchmark provenance and unresolved manuscript rounding/wording differences. `results/models_complete.pkl` is selected automatically by `predictive --dataset complete`.

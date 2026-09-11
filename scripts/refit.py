@@ -34,6 +34,7 @@ def fit_iox(data):
     curves[:, :, 1:] = fit.rho_colocated[:, :, None] - fitted_gamma / denominator[:, :, None]
     curves = 0.5 * (curves + curves.swapaxes(0, 1))
     result = dict(
+        kernel_family="powered_exponential",
         periods=fit.periods, h_bins=empirical.h, empirical_gamma=empirical.gamma,
         fitted_gamma=fit.fitted_gamma, station_pair_counts=empirical.counts,
         marginal_parameters=pd.DataFrame(fit.marginal.optimizer_rows),

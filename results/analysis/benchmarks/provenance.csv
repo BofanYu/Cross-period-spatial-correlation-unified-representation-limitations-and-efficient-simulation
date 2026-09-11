@@ -1,5 +1,5 @@
 field,value
-description,"Unmodified numeric tables used to regenerate the attached September 7, 2026 manuscript figures."
+description,September 11 model-fit/data-requirement refresh; sampling measurements retained from historical runs.
 main_sampling_run,20260904_141242_290218_lmc_conventional
 supplement_period_and_realization_run,20260823_191101_874874_partial_refresh
 supplement_station_run,20260904_142505_073865_available_dense_no_max
@@ -22,3 +22,5 @@ sha256.sampling_640_100_9_summary.csv,fe0fa815d62ae3c980a114a5540c7eb9497597a745
 sha256.supplement_period_summary.csv,376ea2b050738bfa01d21758b4e90a9f77feee0ba837f654d1df0a811dc16289
 sha256.supplement_realization_summary.csv,1869d57ccd0a2ca4177878e7ee66c8f1254afd061cf2c62b4326f92df3f4c178
 sha256.supplement_station_summary.csv,c28e0ee8beb04f9fdf2988faf6de66748657fcf2204c09df222617b164f81f51
+fit_timing_policy,one recorded run per model; unified_timing_once
+data_requirement_source,goulard_weight_only/data_requirement_summary.csv; PE/no-nugget IOX
