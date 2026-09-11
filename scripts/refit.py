@@ -179,13 +179,22 @@ def run_cli(method, families, default=None):
                         help="Updated archive; unselected models retain their saved fits.")
     parser.add_argument("--reference", type=Path, default=ROOT / "results/models.pkl",
                         help="Model archive to update and compare against.")
+    parser.add_argument("--dataset", choices=["full", "complete"], default="full")
     args = parser.parse_args()
+    if args.dataset == "complete":
+        if args.reference == ROOT / "results/models.pkl": args.reference = ROOT / "results/models_complete.pkl"
+        if args.output == ROOT / "results/models.pkl": args.output = ROOT / "results/models_complete.pkl"
 
     payload = mch.load_pickle_cross_platform(args.reference)
     reference_curves = payload["cross_period_psd"]["curves"].copy()
     mle, semi = mch.load_all_modules(ROOT)
-    data = mch.load_comparison_data(ROOT, mle["common"], ROOT / "data/common_records.csv",
-                                    ROOT / "data/periods")
+    if args.dataset == "complete":
+        if method != "semivariogram" or any(x not in ("lmc", "separable") for x in args.models):
+            raise ValueError("Complete-case refit supports LMC/separable semivariograms only")
+        data = mch.comparison_data_from_state(payload["data_state"])
+    else:
+        data = mch.load_comparison_data(ROOT, mle["common"], ROOT / "data/common_records.csv",
+                                        ROOT / "data/periods")
     payload["data_state"] = mch.comparison_data_to_state(data)
     payload["data_state"].update(project_root=".", pca_data_path="data/common_records.csv",
                                   full_data_dir="data/periods")

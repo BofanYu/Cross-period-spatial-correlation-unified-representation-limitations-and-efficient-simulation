@@ -17,8 +17,9 @@ counts each unique target once. Model implementations are in `scripts/models/`.
 The full-data LMC uses sequential Goulard updates, rho(0)/3 initialization,
 fixed spatial kernels and 30 sweeps. Its update is
 `P_PSD(B + W*(N/D - B))`, with diagonal weights 1 and off-diagonal weights 1/2.
-The shortest spatial length scale is 0.01 km. The complete-case LMC fit uses
-the unweighted Goulard update; the full-data refit command uses weighted updates.
+The shortest spatial length scale is 0.01 km. Complete-case and full-data LMC fits both use these weighted updates.
+Separable kernel fitting uses only the nine direct semivariograms, with no
+off-diagonal duplication.
 
 IOX uses `exp(-(h/length)**gamma)` with fitted gamma, zero nugget and no
 spatial Cholesky jitter. Structured sampling factors the period covariance
@@ -105,3 +106,19 @@ python -m scripts.fitting.semivariogram --models pairwise lmc iox --output resul
 Refit checks compare covariance curves with the reference cache and record
 numerical differences. Recompute predictive scores before aggregating results
 for newly fitted parameters.
+
+Complete-case LMC refit and evaluation:
+
+```bash
+python -m scripts.fitting.semivariogram --dataset complete --models lmc
+python -m scripts.analysis.predictive --dataset complete --methods "LMC semivariogram" --output results/analysis/prediction/complete/lmc_wls45
+```
+
+After the complete-case LMC evaluation, merge its event scores with the other
+four models and regenerate tables and verification outputs:
+
+```bash
+python -m scripts.analysis.complete_summary
+python -m scripts.analysis.tables
+python -m scripts.analysis.verify_paper
+```
