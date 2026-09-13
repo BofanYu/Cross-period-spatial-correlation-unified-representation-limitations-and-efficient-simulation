@@ -388,6 +388,89 @@ def fit_kernel_mixture_weights_mle(
     }
 
 
+def fit_lmc_complete_mle(data, iterations=110):
+    """Complete-case exact LMC likelihood in sample-covariance-scaled coordinates.
+
+    Replay the selected fit: 110 L-BFGS-B iterations at gtol=1e-5, followed
+    by the final gtol=1e-4 convergence check. No centering, cap or ridge.
+    The transformation changes optimizer coordinates, not the covariance.
+    """
+    from scripts.models import lmc
+
+    q = len(data.period_cols)
+    lengths, exponents = np.array([15., 70., 0.]), np.array([.4, 1., 1.])
+    blocks = lmc.prepare_lmc_block_events(
+        data.df_pca, data.period_cols, lengths, exponents,
+        max_stations_per_event=None, center=False)
+    objective = lmc.LMCBlockObjective(blocks, q=q, jitter=1e-8, ridge=0.)
+    sample = np.cov(data.df_pca[data.period_cols].to_numpy(float), rowvar=False, bias=True)
+    scale = np.linalg.cholesky(sample + 1e-8 * np.eye(q))
+    tri = np.tril_indices(q)
+    ntri = len(tri[0])
+    diagonal = tri[0] == tri[1]
+
+    def transform(theta):
+        physical_theta, scaled_factors, physical_factors = [], [], []
+        for k in range(3):
+            values = theta[k*ntri:(k+1)*ntri].copy()
+            values[diagonal] = np.exp(values[diagonal])
+            factor = np.zeros((q, q))
+            factor[tri] = values
+            lower = scale @ factor
+            packed = lower[tri].copy()
+            packed[diagonal] = np.log(packed[diagonal])
+            physical_theta.extend(packed)
+            scaled_factors.append(factor)
+            physical_factors.append(lower)
+        return np.asarray(physical_theta), scaled_factors, physical_factors
+
+    def fun(theta):
+        physical_theta, scaled, physical = transform(theta)
+        value, gradient = objective(physical_theta)
+        scaled_gradient = []
+        for k in range(3):
+            packed = gradient[k*ntri:(k+1)*ntri].copy()
+            packed[diagonal] /= np.diag(physical[k])
+            matrix = np.zeros((q, q))
+            matrix[tri] = packed
+            transformed = (scale.T @ matrix)[tri].copy()
+            transformed[diagonal] *= np.diag(scaled[k])
+            scaled_gradient.extend(transformed)
+        return value, np.asarray(scaled_gradient)
+
+    theta = []
+    for weight in (.15, .35, .50):
+        values = np.zeros(ntri)
+        values[diagonal] = .5 * np.log(weight)
+        theta.extend(values)
+    bounds = [(np.log(1e-5), np.log(10.)) if is_diag else (-10., 10.)
+              for _ in range(3) for is_diag in diagonal]
+    options = dict(ftol=1e-9, maxls=60, maxcor=20)
+    first = minimize(fun, np.asarray(theta), jac=True, method="L-BFGS-B", bounds=bounds,
+                     options=dict(options, maxiter=iterations, gtol=1e-5))
+    final = minimize(fun, first.x, jac=True, method="L-BFGS-B", bounds=bounds,
+                     options=dict(options, maxiter=1000, gtol=1e-4))
+    physical_theta, _, _ = transform(final.x)
+    value, gradient = objective(physical_theta)
+    b_raw, _ = objective.unpack(physical_theta)
+    b_norm = lmc.normalize_B_mle(b_raw)
+    rho = lmc.lmc_auto_correlations_mle(b_norm, lengths, exponents, data.h_fine)
+    return dict(
+        name="LMC exact block likelihood MLE, scaled coordinates",
+        success=bool(final.success), message=str(final.message), nll=float(value),
+        final_objective_per_dim=float(value),
+        final_gradient_inf_norm=float(np.max(np.abs(gradient))),
+        scaled_gradient_inf_norm=float(np.max(np.abs(final.jac))),
+        length_scales=lengths, gamma_pe=exponents, B_raw=b_raw, B_norm=b_norm,
+        sills_raw=np.diag(sum(b_raw)), rho=rho, theta=physical_theta,
+        num_events=len(blocks), rows_used=len(data.df_pca),
+        max_stations_per_event=None, ridge=0.,
+        optimizer_options=dict(options, first_maxiter=iterations, first_gtol=1e-5,
+                               final_maxiter=1000, final_gtol=1e-4),
+        iterations=int(first.nit + final.nit),
+    )
+
+
 def main():
     from scripts.refit import run_cli
     run_cli("mle", ("pca", "lmc"), default=("pca",))

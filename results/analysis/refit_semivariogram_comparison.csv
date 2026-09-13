@@ -1,4 +1,0 @@
-method,seconds,curve_rmse,curve_max_abs_difference
-Pairwise empirical semivariogram,0.0605828000116162,0.0,0.0
-LMC semivariogram,0.1464799000241328,0.0,0.0
-IOX full semivariogram,7.414837799995439,7.330361753126984e-08,1.3725283384280473e-06

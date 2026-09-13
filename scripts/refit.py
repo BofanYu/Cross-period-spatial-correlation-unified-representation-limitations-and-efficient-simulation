@@ -1,8 +1,4 @@
-"""Shared refit orchestration used by the two fitting entry points.
-
-All model fits are stored together in results/models.pkl. Selecting a subset
-updates those fits and retains the remaining archived models.
-"""
+"""Fit the full-data and complete-case models from the processed residual CSVs."""
 from __future__ import annotations
 
 import argparse
@@ -13,10 +9,33 @@ import time
 import numpy as np
 import pandas as pd
 
-from scripts.analysis import core as mch
+from scripts.common import core as mch
 from scripts.models import iox, sbss, matern
 
 ROOT = Path(__file__).resolve().parents[1]
+MODEL_DIR = ROOT / "results/analysis/model_fit"
+FULL_MODELS = (
+    ("pairwise", "semivariogram"), ("gh08", "semivariogram"),
+    ("separable", "semivariogram"), ("pca", "semivariogram"), ("pca", "mle"),
+    ("lmc", "semivariogram"), ("lmc", "mle"), ("iox", "semivariogram"),
+    ("sbss", "semivariogram"), ("matern", "semivariogram"),
+)
+COMPLETE_MODELS = tuple(item for item in FULL_MODELS if item[0] in ("separable", "pca", "lmc"))
+
+
+def prepare_data(dataset="full"):
+    """Reconstruct empirical targets; no fitted-model file is read."""
+    mle, _ = mch.load_all_modules(ROOT)
+    data = mch.load_comparison_data(
+        ROOT, mle["common"], ROOT / "data/common_records.csv", ROOT / "data/periods")
+    if dataset == "complete":
+        wide = mch.predictive_full_data_wide(data)
+        wide = wide.dropna(subset=data.period_cols).reset_index(drop=True)
+        data = mch._nonpsd_comparison_data_from_wide(
+            data, mle["common"], wide, data.period_cols)
+    elif dataset != "full":
+        raise ValueError("dataset must be 'full' or 'complete'")
+    return data
 
 
 def fit_iox(data):
@@ -118,7 +137,7 @@ def fit_lmc_mle(data, mle):
         init=capped, **options))
 
 
-def fit_model(data, family, method, payload, mle, semi):
+def fit_model(data, family, method, payload, mle, semi, dataset="full"):
     """Update one model in the shared archive and return its plotted curves."""
     h = data.h_fine
     if family == "pairwise":
@@ -152,7 +171,11 @@ def fit_model(data, family, method, payload, mle, semi):
         return label, (h, mch.pca_period_pair_curves(result, model, h))
     if family == "lmc":
         if method == "mle":
-            result = fit_lmc_mle(data, mle)
+            if dataset == "complete":
+                from scripts.fitting.mle import fit_lmc_complete_mle
+                result = fit_lmc_complete_mle(data)
+            else:
+                result = fit_lmc_mle(data, mle)
             payload["lmc_block_mle"] = {
                 key: value for key, value in result.items()
                 if key not in ("result", "history", "events", "blocks")}
@@ -161,7 +184,8 @@ def fit_model(data, family, method, payload, mle, semi):
             result = mch.fit_lmc_semivariogram(data, semi, n_iterations=30)
             payload["lmc_semivariogram"] = result
             label = "LMC semivariogram"
-        return label, (h, mch.lmc_period_pair_curves(result, semi["lmc"], h))
+        model_api = mle["lmc"] if method == "mle" else semi["lmc"]
+        return label, (h, mch.lmc_period_pair_curves(result, model_api, h))
     label, key, function = {
         "iox": ("IOX full semivariogram", "iox_full_semivariogram", fit_iox),
         "sbss": ("SBSS semivariogram", "sbss_semivariogram", fit_sbss),
@@ -171,54 +195,71 @@ def fit_model(data, family, method, payload, mle, semi):
     return label, curves
 
 
-def run_cli(method, families, default=None):
-    parser = argparse.ArgumentParser(description=f"Refit paper models by {method}.")
-    parser.add_argument("--models", nargs="+", choices=families,
-                        default=list(default or families), metavar="MODEL")
-    parser.add_argument("--output", type=Path, default=ROOT / "results/models.pkl",
-                        help="Updated archive; unselected models retain their saved fits.")
-    parser.add_argument("--reference", type=Path, default=ROOT / "results/models.pkl",
-                        help="Model archive to update and compare against.")
-    parser.add_argument("--dataset", choices=["full", "complete"], default="full")
-    args = parser.parse_args()
-    if args.dataset == "complete":
-        if args.reference == ROOT / "results/models.pkl": args.reference = ROOT / "results/models_complete.pkl"
-        if args.output == ROOT / "results/models.pkl": args.output = ROOT / "results/models_complete.pkl"
+def fit_models(dataset="full", models=None, method=None, output=None, initial=None,
+               include_lmc_mle=True, data=None):
+    """Return (fitted payload, timing DataFrame), optionally writing one PKL.
 
-    payload = mch.load_pickle_cross_platform(args.reference)
-    reference_curves = payload["cross_period_psd"]["curves"].copy()
+    With ``initial=None`` every selected model is fitted from CSV input. Supply
+    a previous payload explicitly to update selected fits while retaining others.
+    ``data=prepare_data(dataset)`` excludes data preparation from fit timing.
+    """
+    import copy
+    jobs = FULL_MODELS if dataset == "full" else COMPLETE_MODELS
+    if models is not None:
+        allowed = {family for family, _ in jobs}
+        unknown = set(models) - allowed
+        if unknown:
+            raise ValueError(f"Models unavailable for {dataset}: {sorted(unknown)}")
+        jobs = tuple(job for job in jobs if job[0] in models)
+    if method is not None:
+        jobs = tuple(job for job in jobs if job[1] == method)
+    if not include_lmc_mle:
+        jobs = tuple(job for job in jobs if job != ("lmc", "mle"))
+    data = prepare_data(dataset) if data is None else data
     mle, semi = mch.load_all_modules(ROOT)
-    if args.dataset == "complete":
-        if method != "semivariogram" or any(x not in ("lmc", "separable") for x in args.models):
-            raise ValueError("Complete-case refit supports LMC/separable semivariograms only")
-        data = mch.comparison_data_from_state(payload["data_state"])
-    else:
-        data = mch.load_comparison_data(ROOT, mle["common"], ROOT / "data/common_records.csv",
-                                        ROOT / "data/periods")
+    payload = copy.deepcopy(initial) if initial is not None else {}
     payload["data_state"] = mch.comparison_data_to_state(data)
     payload["data_state"].update(project_root=".", pca_data_path="data/common_records.csv",
                                   full_data_dir="data/periods")
+    payload.setdefault("cross_period_psd", {"curves": {}})
     rows = []
-    for family in args.models:
-        print(f"Fitting {family} ({method})...", flush=True)
+    for family, fit_method in jobs:
+        print(f"Fitting {dataset}: {family} ({fit_method})...", flush=True)
         start = time.perf_counter()
-        label, (h, curves) = fit_model(data, family, method, payload, mle, semi)
+        label, (h, curves) = fit_model(data, family, fit_method, payload, mle, semi, dataset)
         elapsed = time.perf_counter() - start
         payload["cross_period_psd"]["curves"][label] = (h, curves)
-        ref_h, ref_curves = reference_curves[label]
-        aligned = np.asarray([[np.interp(ref_h, h, values) for values in row] for row in curves])
-        difference = aligned - ref_curves
-        rows.append(dict(method=label, seconds=elapsed,
-                         curve_rmse=float(np.sqrt(np.mean(difference ** 2))),
-                         curve_max_abs_difference=float(np.max(np.abs(difference)))))
-
+        rows.append(dict(dataset=dataset, method=label, family=family,
+                         fitting_method=fit_method, fit_time_seconds=elapsed))
+        # Save after each completed fit so the two fitting CLIs can be run in turn.
+        if output is not None:
+            save_models(payload, output)
     payload["cross_period_psd"]["summary"] = pd.DataFrame()
     payload["cross_period_psd"]["detail"] = pd.DataFrame()
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    with args.output.open("wb") as handle:
+    if output is not None:
+        save_models(payload, output)
+    return payload, pd.DataFrame(rows)
+
+
+def save_models(payload, output):
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("wb") as handle:
         pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    report = args.output.parent / "analysis" / f"refit_{method}_comparison.csv"
-    report.parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(rows).to_csv(report, index=False)
-    print(pd.DataFrame(rows).to_string(index=False))
-    print(f"Saved models: {args.output}\nSaved comparison: {report}")
+
+
+def run_cli(method, families, default=None):
+    parser = argparse.ArgumentParser(description=f"Fit article models by {method}.")
+    parser.add_argument("--models", nargs="+", choices=families, metavar="MODEL")
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--dataset", choices=["full", "complete"], default="full")
+    parser.add_argument("--fresh", action="store_true", help="Start a new archive instead of updating existing fits.")
+    args = parser.parse_args()
+    output = args.output or MODEL_DIR / ("models.pkl" if args.dataset == "full" else "models_complete.pkl")
+    selected = args.models
+    if selected is None and default is not None:
+        selected = default
+    initial = mch.load_pickle_cross_platform(output) if output.exists() and not args.fresh else None
+    _, timing = fit_models(args.dataset, selected, method, output, initial)
+    print(timing.to_string(index=False))
+    print(f"Saved models: {output}")
