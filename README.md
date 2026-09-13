@@ -29,18 +29,11 @@ Run these commands from this repository. In JupyterLab, select the Python 3 kern
 | 9. Fitting computation | `computation/fit.ipynb` | Figure 5 and supplementary Figure S3 |
 | 10. Sampling computation | `computation/sampling.ipynb` | Figures 6-8 and supplementary Figures S4-S6 |
 
-## What each run does
+## Running the notebooks
 
-The notebooks ship with visible outputs. A default run loads the fitted models, runs the full PSD experiment and selected whole-event prediction examples, rebuilds structural/CPC figures, and runs a small sampling benchmark. Long all-event evaluation and refitting experiments are explicitly controlled:
+Saved results are included. Run cells from top to bottom for the default examples. To recompute full experiments, enable the corresponding `RUN_*` or `RERUN*` switch in each notebook.
 
-- In `model_fit.ipynb`, set `RUN_FULL_FIT` or `RUN_COMPLETE_FIT` to `True` to fit from the processed CSV inputs and write the corresponding PKL. This requires no earlier model file. The complete dataset has five fitted variants and uses its own LMC likelihood fit.
-- In each predictive notebook, set `RUN_ALL_EVENTS=True` to evaluate every event with all 20 entry/station holdout repetitions and each available held-out period. Results remain in memory and appear in cells.
-- In data-requirement notebooks, set `RERUN=True`; select the event grid and repetition count in `run_experiment`. `models="main"` includes seven variants, `models="supp"` includes ten, and `models="baseline"` is a smaller six-model run.
-- In computation notebooks, set `RERUN=True` (and `RERUN_SUPPLEMENT=True` for supplementary sampling sweeps) to measure new timings. Supplementary IOX uses the dense covariance comparator; structured IOX can be selected with `iox_dense=False`.
-
-Full prediction, LMC MLE fitting, and the full event-subsampling experiment can take substantial time. The full predictive tables, data-requirement summaries and original timing measurements are embedded explicitly in their notebooks as recorded results. Their cells state this provenance; displaying them is not a claim of a fresh full run. Rerun switches connect new calculations to the displayed tables/plots. New timings depend on the machine. Dense covariance points exceeding the chosen memory limit remain unmeasured.
-
-To execute the default cells of every notebook from the command line:
+Run all notebooks with their current settings:
 
 ```bash
 python -m scripts.reproduce
